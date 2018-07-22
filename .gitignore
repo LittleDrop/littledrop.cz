@@ -1,0 +1,7 @@
+# Hugo
+public/*
+
+# NPM
+node_modules/*
+
+static/webtemp/*

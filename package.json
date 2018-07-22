@@ -1,0 +1,20 @@
+{
+	"dependencies": {
+		"normalize.css": "^8.0.0"
+	},
+	"devDependencies": {
+		"gulp": "^4.0.0",
+		"gulp-clean-css": "^3.9.4",
+		"gulp-concat": "^2.6.0",
+		"gulp-htmlmin": "^4.0.0",
+		"gulp-less": "^4.0.1",
+		"gulp-uglify": "^3.0.0",
+		"gulp-watch": "^5.0.0"
+	},
+	"scripts": {
+		"css": "gulp css",
+		"js": "gulp js",
+		"html": "gulp html",
+		"watch": "gulp watch"
+	}
+}

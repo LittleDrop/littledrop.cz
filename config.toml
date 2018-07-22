@@ -1,0 +1,7 @@
+baseURL = "https://littledrop.cz"
+languageCode = "en-US"
+title = "LittleDrop"
+enableGitInfo = true
+disableKinds = ["taxonomyTerm"]
+disableHugoGeneratorInject = true
+enableEmoji = true
