@@ -1,0 +1,20 @@
+before_script:
+  - wget $(curl --silent "https://api.github.com/repos/gohugoio/hugo/releases/latest" | grep '"browser_download_url":' | grep ".*hugo_[^extended].*_Linux-64bit\.tar\.gz" | sed -E 's/.*"([^"]+)".*/\1/') -O hugo.tar.gz
+  - tar -zxvf hugo.tar.gz
+  - npm install
+
+script:
+  - npm run css
+  - npm run js
+  - ./hugo
+  - npm run html
+  - echo "littledrop.cz" > public/CNAME
+  - echo "/css/*" >> public/.gitignore
+  - echo "/js/*" >> public/.gitignore
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: false
+  local_dir: public
