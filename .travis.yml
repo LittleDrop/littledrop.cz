@@ -1,5 +1,8 @@
+env:
+  - HUGO_VERSION="0.53"
+
 before_script:
-  - wget $(curl --silent "https://api.github.com/repos/gohugoio/hugo/releases/latest" | grep '"browser_download_url":' | grep ".*hugo_[^extended].*_Linux-64bit\.tar\.gz" | sed -E 's/.*"([^"]+)".*/\1/') -O hugo.tar.gz
+  - wget https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz -O hugo.tar.gz
   - tar -zxvf hugo.tar.gz
   - npm install
 
