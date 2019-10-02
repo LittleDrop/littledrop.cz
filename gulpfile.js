@@ -1,10 +1,11 @@
 let gulp = require('gulp');
-let exec = require('child_process').exec;
-let gultpConcat = require('gulp-concat');
-let gultpLess = require('gulp-less');
-let gultpMinifyCss = require('gulp-clean-css');
-let gultpMinifyHtml = require('gulp-htmlmin');
-let gultpMinifyJs = require('gulp-uglify');
+let terser = require('terser');
+let gulpConcat = require('gulp-concat');
+let gulpLess = require('gulp-less');
+let gulpMinifyCss = require('gulp-clean-css');
+let gulpMinifyHtml = require('gulp-htmlmin');
+let gulpMinifyJsComposer = require('gulp-uglify/composer');
+let gulpMinifyJs = gulpMinifyJsComposer(terser, console);
 
 let paths = {
 	css: {
@@ -23,22 +24,22 @@ let paths = {
 
 function css() {
 	return gulp.src(paths.css.src)
-		.pipe(gultpLess())
-		.pipe(gultpMinifyCss({compatibility: 'ie8'}))
-		.pipe(gultpConcat('bundle.css'))
+		.pipe(gulpLess())
+		.pipe(gulpMinifyCss({compatibility: 'ie8'}))
+		.pipe(gulpConcat('bundle.css'))
 		.pipe(gulp.dest(paths.css.dest));
 }
 
 function js() {
 	return gulp.src(paths.js.src)
-		.pipe(gultpMinifyJs())
-		.pipe(gultpConcat('bundle.js'))
+		.pipe(gulpMinifyJs())
+		.pipe(gulpConcat('bundle.js'))
 		.pipe(gulp.dest(paths.js.dest));
 }
 
 function html() {
 	return gulp.src(paths.html.src)
-		.pipe(gultpMinifyHtml({collapseWhitespace: true}))
+		.pipe(gulpMinifyHtml({collapseWhitespace: true}))
 		.pipe(gulp.dest(paths.html.dest));
 }
 
