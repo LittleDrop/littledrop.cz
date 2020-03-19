@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+
+      - name: Setup npm
+        run: |
+          npm install
+
+      - name: Build
+        run: |
+          npm run css
+          npm run js
+          hugo
+          npm run html
+          echo "/css/*" >> public/.gitignore
+          echo "/js/*" >> public/.gitignore
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./public
+          cname: littledrop.cz
+          enable_jekyll: false
+          allow_empty_commit: true
+          force_orphan: true
