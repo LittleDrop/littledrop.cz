@@ -1,11 +1,9 @@
 let gulp = require('gulp');
-let terser = require('terser');
 let gulpConcat = require('gulp-concat');
 let gulpLess = require('gulp-less');
 let gulpMinifyCss = require('gulp-clean-css');
 let gulpMinifyHtml = require('gulp-htmlmin');
-let gulpMinifyJsComposer = require('gulp-uglify/composer');
-let gulpMinifyJs = gulpMinifyJsComposer(terser, console);
+let gulpMinifyJs = require('gulp-terser');
 
 let paths = {
 	css: {
