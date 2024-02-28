@@ -26,7 +26,7 @@
 
 		<meta http-equiv="refresh" content="3;url=https://richardkapicka.cz">
 
-		<link rel="stylesheet" href="/webtemp/bundle.css?{{ readFile "/static/webtemp/bundle.css" | md5}}">
+		<link rel="stylesheet" href="/css/main.less?{{ readFile "/static/main.less" | md5}}" />
 	</head>
 	<body>
 		<div class="top-line"></div>
@@ -35,6 +35,6 @@
 			{{ block "main" .}}{{ end }}
 		</div>
 
-		<script src="/webtemp/bundle.js?{{ readFile "/static/webtemp/bundle.js" | md5}}"></script>
+		<script src="/js/main.js?{{ readFile "/static/js/main.js" | md5}}" type="module"></script>
 	</body>
 </html>

@@ -2,6 +2,6 @@ baseURL = "https://littledrop.cz"
 languageCode = "en-US"
 title = "LittleDrop"
 enableGitInfo = true
-disableKinds = ["taxonomyTerm"]
+disableKinds = ["taxonomy"]
 disableHugoGeneratorInject = true
 enableEmoji = true
