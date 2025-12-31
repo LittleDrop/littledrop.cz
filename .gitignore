@@ -1,6 +1,8 @@
-# Hugo
+.tools/var/*
 public/*
 .hugo_build.lock
-
-# NPM
 node_modules/*
+
+# Whitelist
+!.gitignore
+!.gitkeep

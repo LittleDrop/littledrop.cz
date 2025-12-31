@@ -1,0 +1,10 @@
+name: "CS - All"
+
+on: push
+
+jobs:
+    editorconfig:
+        uses: ./.github/workflows/cs-editorconfig.yaml
+
+    prettier:
+        uses: ./.github/workflows/cs-prettier.yaml

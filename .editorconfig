@@ -1,5 +1,3 @@
-# EditorConfig is awesome: http://EditorConfig.org
-
 root = true
 
 [*]
@@ -8,7 +6,11 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{md,html,ts,js,less,json}]
+[*.{md,html,ts,cjs,js,less,json,sh}]
 indent_style = tab
 indent_size = tab
 tab_width = 4
+
+[*.{toml,yml,yaml}]
+indent_size = 4
+indent_style = space
