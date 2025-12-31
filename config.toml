@@ -3,5 +3,6 @@ languageCode = "en-US"
 title = "LittleDrop"
 enableGitInfo = true
 disableKinds = ["taxonomy"]
+ignoreErrors = ["error-disable-taxonomy"]
 disableHugoGeneratorInject = true
 enableEmoji = true

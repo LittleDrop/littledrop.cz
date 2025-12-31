@@ -1,0 +1,184 @@
+name: Build & Push Docker Image
+
+on:
+    workflow_call:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    build-static:
+        runs-on: ubuntu-latest
+
+        outputs:
+            dockerBuild: ${{ steps.decide.outputs.dockerBuild }}
+            publicHash:   ${{ steps.publicHash.outputs.publicHash }}
+
+        steps:
+            -   name: Ensure master branch
+                if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/master'
+                run: |
+                    echo "Manual build is only allowed on master"
+                    exit 1
+
+            -   name: Checkout
+                uses: actions/checkout@v5
+                with:
+                    fetch-depth: 0
+
+            -   name: Use Node.js
+                uses: actions/setup-node@v6
+                with:
+                    node-version: 25
+
+            -   name: Cache Node modules
+                uses: actions/cache@v5
+                with:
+                    path: |
+                        ~/.npm
+                        node_modules
+                    key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+                    restore-keys: |
+                        ${{ runner.os }}-node-
+
+            -   name: Install dependencies
+                run: npm clean-install
+
+            -   name: Pull Hugo docker
+                run: docker pull klakegg/hugo:ext-alpine || true
+
+            -   name: Hugo build (dockerized)
+                run: |
+                    rm -rf public || true
+                    mkdir -p public
+                    docker run --rm \
+                        -u "$(id -u):$(id -g)" \
+                        -v "${{ github.workspace }}":/src \
+                        -w /src \
+                        klakegg/hugo:ext-alpine \
+                        -d public
+
+            -   name: Vite build
+                run: |
+                    npm run build:vite
+                    npm run build:cleanup
+
+            -   name: Compute public hash
+                id: publicHash
+                run: |
+                    HASH=$(tar -C public -cf - . | sha256sum | cut -d' ' -f1)
+                    echo "publicHash=$HASH" >> $GITHUB_OUTPUT
+                    echo "Public hash: $HASH"
+
+            -   name: Read previous public hash from GHCR
+                id: previousHash
+                run: |
+                    IMAGE="ghcr.io/${{ github.repository }}"
+                    IMAGE="${IMAGE,,}"
+
+                    HASH=$(docker buildx imagetools inspect "$IMAGE:latest" \
+                        --format '{{ index .Annotations "cz.littledrop.publicHash" }}' 2>/dev/null || true)
+
+                    [ "$HASH" = "null" ] && HASH=""
+
+                    echo "previousHash=$HASH" >> $GITHUB_OUTPUT
+                    echo "Previous hash: $HASH"
+
+            -   name: Decide if Docker image is needed
+                id: decide
+                run: |
+                    FILES=(
+                        Dockerfile
+                        Caddyfile
+                    )
+
+                    NEW="${{ steps.publicHash.outputs.publicHash }}"
+                    OLD="${{ steps.previousHash.outputs.previousHash }}"
+                    CHANGED=0
+
+                    if git rev-parse HEAD~1 >/dev/null 2>&1; then
+                        if ! git diff --quiet HEAD~1 -- "${FILES[@]}"; then
+                            CHANGED=1
+                        fi
+                    else
+                        # First commit
+                        CHANGED=1
+                    fi
+
+                    if [ -z "$OLD" ] || [ "$NEW" != "$OLD" ] || [ "$CHANGED" -eq 1 ]; then
+                        echo "dockerBuild=true" >> $GITHUB_OUTPUT
+                        echo "Docker image WILL be built"
+                    else
+                        echo "dockerBuild=false" >> $GITHUB_OUTPUT
+                        echo "Docker image SKIPPED (no changes)"
+                    fi
+
+            -   name: Archive public folder
+                uses: actions/upload-artifact@v6
+                with:
+                    name: public-static
+                    path: public
+
+    docker-image:
+        needs:
+            - build-static
+
+        if: needs.build-static.outputs.dockerBuild == 'true'
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v5
+
+            -   name: Download public artifact
+                uses: actions/download-artifact@v7
+                with:
+                    name: public-static
+                    path: ./public
+
+            -   name: Set up QEMU
+                uses: docker/setup-qemu-action@v3
+
+            -   name: Set up Docker Buildx
+                uses: docker/setup-buildx-action@v3
+
+            -   name: Log in to GHCR
+                uses: docker/login-action@v3
+                with:
+                    registry: ghcr.io
+                    username: ${{ github.actor }}
+                    password: ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Prepare image name and tags
+                id: vars
+                run: |
+                    IMAGE="ghcr.io/${{ github.repository }}"
+                    IMAGE="${IMAGE,,}"
+                    SHORT_SHA=${GITHUB_SHA::7}
+                    echo "IMAGE=$IMAGE" >> $GITHUB_OUTPUT
+                    echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+            -   name: Build and push Docker image
+                uses: docker/build-push-action@v6
+                with:
+                    context: .
+                    file: ./Dockerfile
+                    platforms: linux/amd64,linux/arm64
+                    push: true
+                    provenance: true
+                    sbom: true
+                    tags: |
+                        ${{ steps.vars.outputs.IMAGE }}:${{ steps.vars.outputs.SHORT_SHA }}
+                        ${{ steps.vars.outputs.IMAGE }}:latest
+                    labels: |
+                        cz.littledrop.publicHash=${{ needs.build-static.outputs.publicHash }}
+                        org.opencontainers.image.source=https://github.com/LittleDrop/littledrop.cz
+                        org.opencontainers.image.description=Littledrop.cz website
+                    annotations: |
+                        cz.littledrop.publicHash=${{ needs.build-static.outputs.publicHash }}
+                        org.opencontainers.image.source=https://github.com/LittleDrop/littledrop.cz
+                        org.opencontainers.image.description=Littledrop.cz website
+                    cache-from: type=gha
+                    cache-to: type=gha,mode=max

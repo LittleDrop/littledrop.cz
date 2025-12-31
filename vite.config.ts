@@ -9,6 +9,15 @@ const hugoConfigFileName = 'config.toml';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+	root: hugoOutDir,
+	base: '/',
+	build: {
+		outDir: hugoOutDir,
+		emptyOutDir: true,
+		rollupOptions: {
+			input: resolve(hugoOutDir, 'index.html'),
+		},
+	},
 	plugins: [
 		hugoPlugin({
 			appDir,

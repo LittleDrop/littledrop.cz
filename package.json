@@ -16,11 +16,10 @@
 	},
 	"scripts": {
 		"build": "npm run build:dev",
-		"build:prod": "npm run build:hugo && npm run build:vite",
 		"build:dev": "npm run build:hugo && npm run build:vite && npm run build:cleanup",
-		"build:hugo": "rm -rf public && hugo -d public",
-		"build:vite": "vite build --outDir public",
-		"build:cleanup": "rm -rf public/{css,js,img}",
+		"build:hugo": "(rm -rf public 2>/dev/null || true) && hugo -d public",
+		"build:vite": "vite build",
+		"build:cleanup": "rm -rf public/css public/js public/img 2>/dev/null || true",
 		"vite:preview": "npm run build && vite preview"
 	}
 }

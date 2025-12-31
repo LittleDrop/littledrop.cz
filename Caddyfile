@@ -1,0 +1,19 @@
+# https://caddyserver.com/docs/
+
+:8080 {
+	root * /usr/share/caddy
+
+	encode zstd gzip
+
+	file_server
+
+	header {
+		Cache-Control "public, max-age=300"
+	}
+
+	@assets {
+		path *.css *.js *.woff *.woff2 *.png *.jpg *.gif *.svg *.ico *.webp *.avif
+	}
+
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+}

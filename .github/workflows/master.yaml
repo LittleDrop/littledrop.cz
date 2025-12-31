@@ -1,0 +1,23 @@
+name: "Master Workflow"
+
+on:
+    push:
+    pull_request:
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    cs-all:
+        uses: ./.github/workflows/cs-all.yaml
+
+    docker-image:
+        needs:
+            - cs-all
+
+        if: |
+            github.event_name == 'push' &&
+            github.ref == 'refs/heads/master'
+
+        uses: ./.github/workflows/docker-image.yaml

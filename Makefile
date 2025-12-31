@@ -1,5 +1,5 @@
 ROOT_DIRECTORY = $(shell dirname "$(realpath $(lastword $(MAKEFILE_LIST)))")
-PRETTIER_PATTERN='**/*.{css,js,jsx,less,ts,tsx}'
+PRETTIER_PATTERN='**/*.{css,cjs,js,jsx,less,ts,tsx}'
 
 .DEFAULT_GOAL := help
 

@@ -9,7 +9,7 @@ module.exports = {
 	jsxSingleQuote: true,
 	plugins: [
 		'@trivago/prettier-plugin-sort-imports',
-		'prettier-plugin-organize-imports'
+		'prettier-plugin-organize-imports',
 	],
 	printWidth: 80,
 	quoteProps: 'consistent',
